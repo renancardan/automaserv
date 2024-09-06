@@ -90,7 +90,7 @@ export default () => {
         
         <Image source={require('../assets/Automaserv.png')}  style={styles.ImageVer2 } />
         
-      <Image source={require('../assets/Caregar.gif')}  style={styles.ImageVer3 } />
+      <Image source={require('../assets/Loding.gif')}  style={styles.ImageVer3 } />
          
       </View>
     )
@@ -148,8 +148,8 @@ const styles = StyleSheet.create({
        
       },  
       ImageVer3:{
-        width:100,
-        height:100,
+        width:50,
+        height:50,
        
     
        

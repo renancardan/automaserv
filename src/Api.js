@@ -1,10 +1,12 @@
 import axios from 'axios';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+//var Url = "http://stocpdv.com.br:5555"
+var Url = "http://localhost:3000"
 export default {
-  Produtos: async (IdEmp, setCat, setDadoEmp) => {
+  Produtos: async (IdEmp, setCat, setDadoEmp,  setPedidoList) => {
 
    
-    await axios.post('http://localhost:3000/produtos', {
+    await axios.post(Url+'/produtos', {
       IdEmp: IdEmp,
     }).then(response => {
       setCat(response.data)
@@ -14,7 +16,7 @@ export default {
     });;
   
     
-    await axios.post('http://localhost:3000/dadoEmpresa', {
+    await axios.post(Url+'/dadoEmpresa', {
       IdEmp: IdEmp,
     }).then(response => {
       
@@ -23,13 +25,20 @@ export default {
     })
     .catch(error => {
       console.error('Erro ao buscar dados:', error);
-    });;
-
-    await axios.post('http://localhost:3000/VerList', {
+    });
+    var tel = await AsyncStorage.getItem('Tel');
+    await axios.post(Url+'/VerList', {
       IdEmp: IdEmp,
+      Tel: tel,
     }).then(response => {
+      console.log(response.data);
+      if(response.data.length > 0){
+        setPedidoList(response.data[0])
+      } else {
+        setPedidoList(null)
+      }
+     
       
-      console.log(response.data[0].Pedido);
       
     })
     .catch(error => {
@@ -42,7 +51,7 @@ export default {
       
        
   },
-  Finalizando: async (ValorEnt, Emp, Itens, Tel, Nome, Rua, Numero, Bairro, Complemento, Cidade, Estado, Pix, CartDebi, CartCred, Cheque, Boleto, Dinheiro, Troco, Buscar, Entreg, Consumo) => {
+  Finalizando: async (ValorEnt, Emp, Itens, Tel, Nome, Rua, Numero, Bairro, Complemento, Cidade, Estado, Pix, CartDebi, CartCred, Cheque, Boleto, Dinheiro, Troco, Buscar, Entreg, Consumo, PegarProdutos) => {
     var TransPix = 0
     if(Pix){
       TransPix = 1
@@ -102,7 +111,7 @@ export default {
       TransConsumo = 0
     }
 
-    await axios.post('http://localhost:3000/Pedido', {
+    await axios.post(Url+'/Pedido', {
       IdEmp: Emp,
       Pedido:Itens, 
       Tel:Tel,
@@ -125,6 +134,7 @@ export default {
       Consumo:TransConsumo,
       ValorEnt:ValorEnt,
     }).then(response => {
+      PegarProdutos()
       console.log(response.data);
     })
     .catch(error => {

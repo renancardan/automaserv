@@ -73,33 +73,42 @@ export default ({route}) => {
     const [Itens, setItens] = useState([]);
     const [Mostcar, setMostcar] = useState(false);
     const [Status, setStatus] = useState(false);
+    const [AtivoPedido, setAtivoPedido] = useState(false);
+    const [PedidoList, setPedidoList] = useState(null);
    
     useEffect(()=>{
-
       PegarProdutos()
+      
+      const interval = setInterval(() => {
+        PegarProdutos()
+      }, 60000);
+  
+     
+      return () => clearInterval(interval);
+      
      
     }, []);
+   
     useEffect(()=>{
       
      if(DadoEmp.NomeEmp){
       
       VerTempo()
-     const interval = setInterval(() => {
-      VerTempo()
-    }, 60000);
-
-   
-    return () => clearInterval(interval);
+    
     }
+
     }, [DadoEmp]);
-    // useEffect(()=>{
-    //   VerTempo()
-    //  if(DadoEmp.NomeEmp){
-      
-     
-   
-    // }
-    // }, [DadoEmp]);
+    useEffect(()=>{
+      if(PedidoList ){
+        setModalVisibleCar(true)
+       
+      } else{
+        setModalVisibleCar(false)
+      }
+    
+    
+      console.log(PedidoList)
+    }, [PedidoList]);
 
     useEffect(()=>{
      console.log("Status "+Status)
@@ -123,9 +132,9 @@ export default ({route}) => {
     }, [Pesq]);
 
     const VerTempo = ()=>{
-
+  console.log(DadoEmp)
   let variac = new Date().getTime();
-  console.log(variac)
+  //console.log(variac)
 
  
   var DiaSemana =  moment().format('dddd');
@@ -138,8 +147,10 @@ export default ({route}) => {
   var HoraMed = 23*60
   var MinMed = 59
   var TmpMed = HoraMed+MinMed 
-   
+      console.log(DiaSemana)
+      
        if ("Monday" === DiaSemana){
+
           var DomIni = DadoEmp.Tem_DomIni.split(":");
           var DomHoraIni = parseInt(DomIni[0])*60
           var DomMinIni = parseInt(DomIni[1])
@@ -326,12 +337,13 @@ export default ({route}) => {
           var QuaHoraIni = parseInt(QuaIni[0])*60
           var QuaMinIni = parseInt(QuaIni[1])
           var QuaTmpIni = QuaHoraIni+QuaMinIni 
-          
+          console.log("Minnuto Inicial "+QuaTmpIni)
+          console.log("Minuto atual "+TempMIn)
           var QuaFim = DadoEmp.Tem_QuaFim.split(":");
           var QuaHoraFim = parseInt(QuaFim[0])*60
           var QuaMinFim = parseInt(QuaFim[1])
           var QuaTmpFim = QuaHoraFim+QuaMinFim 
-  
+          console.log("Minnuto Final "+QuaTmpFim)
         
         
          
@@ -746,7 +758,7 @@ export default ({route}) => {
     
      }
     const PegarProdutos = ()=>{
-      Api.Produtos(IdEmp, setCat, setDadoEmp)
+      Api.Produtos(IdEmp, setCat, setDadoEmp, setPedidoList )
     }
 
   const PesquisandoItem = ()=>{
@@ -842,6 +854,10 @@ const SomarItens = ()=>{
           modalVisible={modalVisible}
           />
           <ModalCar
+          PegarProdutos={PegarProdutos}
+          setAtivoPedido={setAtivoPedido}
+          AtivoPedido={AtivoPedido}
+          PedidoList={PedidoList}
           DadoEmp={DadoEmp}
           VerTotal={VerTotal}
           Itens={Itens}

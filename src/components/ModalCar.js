@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import {Dimensions, Image, View, Text, StyleSheet, Button, Modal, TouchableOpacity, ScrollView, TouchableHighlight  } from 'react-native';
 import { Ionicons, Feather, AntDesign, FontAwesome6, FontAwesome5} from '@expo/vector-icons'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Campo from './CampoQuant';
 import Telefone from './NumberTel'
 import InputNome from './InputNome';
 import InputComent from './InputComent';
 import Api from '../Api'
+import Pesquisa from './Pesquisa';
 
 const { width, height,  } = Dimensions.get('window');
-const App = ({DadoEmp, VerTotal, setModalVisible, modalVisible, setItens, Itens}) => {
-    console.log(DadoEmp.End_Cidade)
-  const [Nome, setNome] = useState("");
+const App = ({PegarProdutos, setAtivoPedido, AtivoPedido, PedidoList, DadoEmp, VerTotal, setModalVisible, modalVisible, setItens, Itens}) => {
+ 
+ // console.log(PedidoList)
+    const [Nome, setNome] = useState("");
     const [Tel, setTel] = useState("");
     const [Rua, setRua] = useState("");
     const [Numero, setNumero] = useState("");
@@ -31,20 +34,131 @@ const App = ({DadoEmp, VerTotal, setModalVisible, modalVisible, setItens, Itens}
     const [Consumo, setConsumo] = useState(false);
     const [TelEnd, setTelEnd] = useState(false);
     const [Coment, setComent] = useState("");
-
-
+    const [MesgErro1, setMesgErro1] = useState("");
+    const [Carreg, setCarreg] = useState(false);
+    const [PedItens, setPedItens] = useState([]);
+    const [Tot, setTot] = useState(0);
 
     useEffect(()=>{
 
       PrencheCidEst()
      
     }, [modalVisible]);
+    useEffect(()=>{
 
-    const FinalizandoPedido = ()=>{
+      PreencherTel()
+      
+    }, []);
+    useEffect(()=>{
+     if(PedItens.length >0){
+      CalcularTotal()
+     }
+     
+      
+    }, [PedItens]);
+    useEffect(()=>{
+
+      PreenchendoIntens()
+      
+    }, [PedidoList]);
+
+    useEffect(()=>{
+
+      EscreverTel(Tel)
+      
+    }, [Tel]);
+
+    const PreenchendoIntens = ()=>{
+      if(PedidoList){
+        var arrayConvertido = JSON.parse(PedidoList.Pedido);
+        setPedItens(arrayConvertido)
+      }
+   
+    }
+    const CalcularTotal = ()=>{
+       var Valor = 0 
+       for(let i in PedItens){
+         Valor = Valor + (PedItens[i].Preco*PedItens[i].Quant)
+       }
+       setTot(Valor)
+    }
+
+    const EscreverTel = (t)=>{
+      setTel(t)
+      if(t.length === 14){
+          setTelEnd(true)
+      } else {
+          setTelEnd(false)
+      }
+      }
+
+    const PreencherTel = async ()=>{
+      var tel = await AsyncStorage.getItem('Tel');
+      setTel(tel)
+     
+    }
+
+    const FinalizandoPedido = async()=>{
       var Emp = DadoEmp.idEmp
       var ValorEnt = DadoEmp.Rec_ValorEnt
+      if(Buscar){
+        if(Tel){
+          if(Nome){
+            setMesgErro1("")
+            setCarreg(true)
+            await AsyncStorage.setItem('Tel', Tel);
+            Api.Finalizando(ValorEnt, Emp, Itens, Tel, Nome, Rua, Numero, Bairro, Complemento, Cidade, Estado, Pix, CartDebi, CartCred, Cheque, Boleto, Dinheiro, Troco, Buscar, Entreg, Consumo, PegarProdutos )
+          } else {
+              setMesgErro1("Preencha seu nome, pois é obrigatório!")
+          } 
+        } else {
+            setMesgErro1("O telefone fornecido está incompleto!")
+        } 
+      } else  if(Consumo){
+        if(Tel){
+          if(Nome){
+            setMesgErro1("")
+            setCarreg(true)
+            await AsyncStorage.setItem('Tel', Tel);
+            Api.Finalizando(ValorEnt, Emp, Itens, Tel, Nome, Rua, Numero, Bairro, Complemento, Cidade, Estado, Pix, CartDebi, CartCred, Cheque, Boleto, Dinheiro, Troco, Buscar, Entreg, Consumo, PegarProdutos )
+          } else {
+              setMesgErro1("Preencha seu nome, pois é obrigatório!")
+          } 
+        } else {
+            setMesgErro1("O telefone fornecido está incompleto!")
+        } 
+      } else if(Entreg){
+        if(Tel){
+          if(Nome){
+            if(Rua){
+              if(Numero){
+                if(Bairro){
+                  if(Pix || CartCred || CartDebi || Cheque || Boleto || Dinheiro){
+                   setMesgErro1("")
+                    setCarreg(true)
+                    await AsyncStorage.setItem('Tel', Tel);
+                    Api.Finalizando(ValorEnt, Emp, Itens, Tel, Nome, Rua, Numero, Bairro, Complemento, Cidade, Estado, Pix, CartDebi, CartCred, Cheque, Boleto, Dinheiro, Troco, Buscar, Entreg, Consumo, PegarProdutos )
+                  } else {
+                      setMesgErro1("Escolha Uma forma de Pagamento, pois é obrigatório!")
+                  } 
+                } else {
+                    setMesgErro1("Preencha o Bairro, pois é obrigatório!")
+                } 
+              } else {
+                  setMesgErro1("Preencha o Numero, pois é obrigatório!")
+              } 
+            } else {
+                setMesgErro1("Preencha a Rua, pois é obrigatório!")
+            } 
+          } else {
+              setMesgErro1("Preencha seu nome, pois é obrigatório!")
+          } 
+        } else {
+            setMesgErro1("O telefone fornecido está incompleto!")
+        } 
+      }
   
-      Api.Finalizando(ValorEnt, Emp, Itens, Tel, Nome, Rua, Numero, Bairro, Complemento, Cidade, Estado, Pix, CartDebi, CartCred, Cheque, Boleto, Dinheiro, Troco, Buscar, Entreg, Consumo )
+     
     
     }
   
@@ -56,14 +170,7 @@ const App = ({DadoEmp, VerTotal, setModalVisible, modalVisible, setItens, Itens}
       }
       
     }
-    const EscreverTel = (t)=>{
-        setTel(t)
-        if(t.length === 14){
-            setTelEnd(true)
-        } else {
-            setTelEnd(false)
-        }
-    }
+   
 
     const Entregar = ()=>{
       setEntreg(true)
@@ -184,6 +291,12 @@ NewItens.push(
     }
   };
 
+  const FecharModal = ()=>{
+    setModalVisible(false)
+    setMesgErro1("")
+    setCarreg(false)
+  }
+
    
   return (
     
@@ -192,7 +305,7 @@ NewItens.push(
         transparent={true}
         visible={modalVisible}
         animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={() =>FecharModal() }
       >
         <View style={styles.overlay} >
           <View style={styles.menu}>
@@ -200,7 +313,169 @@ NewItens.push(
           <ScrollView 
            showsVerticalScrollIndicator={false}
           style={styles.Container2}>
-          <TouchableHighlight  onPress={() => setModalVisible(false)}style={styles.Container7}>
+            {PedidoList  ?
+            <>
+             <TouchableHighlight  style={styles.Container7}>
+            <>
+          <View >
+        
+             </View>
+          <Text style={styles.menuItem}>Pedido</Text>
+          <View >
+            <></>
+             </View>
+             </>
+          </TouchableHighlight>
+          <View  style={styles.Container8}>
+            <Text style={{fontSize:17, color:"green", fontWeight:"bold"}}>{PedidoList.Status}</Text>
+          </View>
+          <View style={styles.Container5}>
+{ PedItens.length > 0  &&
+    <>
+    
+    {PedItens.map((item, key)=>(
+        <>
+       
+
+          
+       
+    <View style={styles.Container1}>
+   
+     <View   style={styles.Prod4}>
+     <View   style={styles.Prod}>
+      {item.FotoUrl ?
+        <Image
+        source={{ uri: item.FotoUrl }}  // use uri instead of require
+        style={styles.Img}
+        />
+      :
+    <Image
+        source={require("../assets/semImg.gif")}  // use uri instead of require
+        style={styles.Img}
+        />
+      }
+     
+      </View>
+      <View   style={styles.Prod10}>
+        <Text style={styles.menuItem1}>{item.Quant} X {item.Nome}</Text>
+        <Text style={styles.menuItem1}>R$ {item.Preco} X {item.Quant} = R$ {item.Preco*item.Quant}</Text>
+      </View>
+      </View>
+     
+
+
+   
+  </View>
+  <View style={styles.LinhaTop}></View>
+  </>
+        ))}
+      </>}
+      <Text style={{fontSize:20}}>Total: R$ {Tot}</Text>
+  </View>
+  {/* <View  style={styles.Container8}>
+      <Text style={{fontSize:17}}>Comentario: {PedidoList.Telefone}</Text>
+     
+          </View> */}
+
+              <View  style={styles.Container8}>
+      <Text style={{fontSize:17}}>Tel: {PedidoList.Telefone}</Text>
+     
+          </View>
+                <View  style={styles.Container8}>
+        <Text style={{fontSize:17}}>Nome: {PedidoList.Nome}</Text>
+        
+          </View>
+          {PedidoList.Rec_Buscar === 1 &&
+
+          <View  style={styles.Container8}>
+             <Text style={{fontSize:17}}>Buscar No Local</Text>
+          </View>
+
+          
+          }
+         {PedidoList.Rec_Consumoloc === 1 &&
+
+          <View  style={styles.Container8}>
+            <Text style={{fontSize:17}}>Buscar No Local</Text>
+          </View>
+          }
+          {PedidoList.Rec_Entregar === 1 &&
+            <>
+          <View  style={styles.Container8}>
+            <Text style={{fontSize:17, fontWeight:"bold"}}>Entregar no Endereço</Text>
+          </View>
+        <View  style={styles.Container8}>
+          <Text style={{fontSize:17}}>Rua: {PedidoList.End_Rua}</Text>
+        </View>
+        <View  style={styles.Container8}>
+          <Text style={{fontSize:17}}>Numero: {PedidoList.End_Numero}</Text>
+        </View>
+        <View  style={styles.Container8}>
+          <Text style={{fontSize:17}}> Bairro: {PedidoList.End_Bairro}</Text>
+        </View>
+        <View  style={styles.Container8}>
+          <Text style={{fontSize:17}}> Complemento: {PedidoList.End_Comp}</Text>
+        </View>
+        <View  style={styles.Container8}>
+          <Text style={{fontSize:17}}> Cidade: {PedidoList.End_Cidade}</Text>
+        </View>
+        <View  style={styles.Container8}>
+          <Text style={{fontSize:17}}> Estado: {PedidoList.End_Estado}</Text>
+        </View>
+        <View  style={styles.Container8}>
+            <Text style={{fontSize:17, fontWeight:"bold"}}>Forma de Pagamento</Text>
+          </View>
+        <View  style={styles.Container10}>
+            {PedidoList.Pg_Pix === 1 &&
+            <View  style={styles.Container11}>
+            <FontAwesome6 name="pix" size={24} color="green" /> 
+            <Text style={styles.Text12}>Pix</Text>
+            </View>
+            }
+         
+          {PedidoList.Pg_CartDebi === 1 &&
+          <>
+          <View  style={styles.Container11}>
+            <FontAwesome5 name="credit-card" size={24} color="#0d92bc" />
+          <Text style={styles.Text12}>Cartão de Débito</Text>
+          </View>
+          </>
+
+          }
+          {PedidoList.Pg_CartCred === 1 &&
+            <View  style={styles.Container11}>
+            <FontAwesome5 name="cc-mastercard" size={24} color="#b75e26" />
+            <Text style={styles.Text12}>Cartão de Crédito</Text>
+            </View>
+          }
+           {PedidoList.Pg_Cheque === 1 &&
+            <View  style={styles.Container11}>
+            <FontAwesome5 name="money-check-alt" size={24} color="#ff9b00" />
+          <Text style={styles.Text12}>Cheque</Text>
+          </View>
+
+           }
+           {PedidoList.Pg_Boleto === 1 &&
+              <View  style={styles.Container11}>
+              <FontAwesome5 name="barcode" size={24} color="black" />
+              <Text style={styles.Text12}>Boleto</Text>
+              </View>
+           }
+          {PedidoList.Pg_Dinheiro === 1 &&
+        <View  style={styles.Container11}>
+           <FontAwesome6 name="money-bill-wave" size={24} color="#006eff" /> 
+          <Text style={styles.Text12}>Dinheiro</Text>
+          </View>
+          }
+          
+          </View>
+          </>
+          }
+          
+            </>
+             :
+             <>
+              <TouchableHighlight  onPress={() =>FecharModal()}style={styles.Container7}>
             <>
           <View >
           <AntDesign name="closecircleo" size={24} color="red" />
@@ -211,6 +486,11 @@ NewItens.push(
              </View>
              </>
           </TouchableHighlight>
+          {MesgErro1 &&
+        <View  style={styles.Container8}>
+          <Text style={{fontSize:10, color:"red"}}>{MesgErro1} </Text>
+        </View>
+          }
           <View  style={styles.Container8}>
   <Text style={{fontSize:17}}>Tel:</Text>
   <Telefone
@@ -559,18 +839,32 @@ NewItens.push(
           </>
 
           }
-         
-          <TouchableHighlight  onPress={() => FinalizandoPedido()}style={styles.Container9}>
-            <>
-         
-          <Text style={styles.menuItem2}>Finalizar a Compra</Text>
-          
-             </>
-          </TouchableHighlight>
+          {MesgErro1 &&
+        <View  style={styles.Container8}>
+          <Text style={{fontSize:10, color:"red"}}>{MesgErro1} </Text>
+        </View>
+          }
+         {Carreg ?
+         <View  style={styles.Container27}>
+         <Image source={require('../assets/Loding.gif')}  style={styles.ImageVer3 } />
+         </View>
+         :
+         <TouchableHighlight  onPress={() =>FinalizandoPedido()}style={styles.Container9}>
+         <>
+      
+       <Text style={styles.menuItem2}>Finalizar a Compra</Text>
+       
+          </>
+       </TouchableHighlight>
+         }
+        
   
   </>
 
   }
+             </>
+            }
+         
   
           </ScrollView>
           </View>
@@ -581,6 +875,13 @@ NewItens.push(
 };
 
 const styles = StyleSheet.create({
+  ImageVer3:{
+    width:50,
+    height:50,
+   
+
+   
+  }, 
     Escolha1:{
         width:20,
         height:20,
@@ -629,7 +930,7 @@ const styles = StyleSheet.create({
         },
     Container2:{
         opacity: 1,
-        width:"100%", 
+        width:"100%",
        },
  Container5:{
         opacity: 1,
@@ -675,6 +976,18 @@ const styles = StyleSheet.create({
         borderRadius:10,
         marginBottom:10,
         justifyContent: "flex-start",
+        alignItems:"center",
+        flexDirection:"row",
+        
+       },
+       Container27:{
+        paddingBottom:10,
+        width:"100%",
+        paddingLeft:10,
+        paddingTop:5,
+        borderRadius:10,
+        marginBottom:10,
+        justifyContent: "center",
         alignItems:"center",
         flexDirection:"row",
         
@@ -742,6 +1055,15 @@ const styles = StyleSheet.create({
         paddingLeft:5,
      
      } ,
+     Prod10:{
+      width:"100%",
+      
+      display:"flex",
+    
+      alignItems:"flex-start",
+      paddingLeft:5,
+   
+   } ,
      Prod4:{
         width: 100,
         
