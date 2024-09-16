@@ -27,23 +27,23 @@ export default {
       console.error('Erro ao buscar dados:', error);
     });
     var tel = await AsyncStorage.getItem('Tel');
-    await axios.post(Url+'/VerList', {
-      IdEmp: IdEmp,
-      Tel: tel,
-    }).then(response => {
-      console.log(response.data);
-      if(response.data.length > 0){
-        setPedidoList(response.data[0])
-      } else {
-        setPedidoList(null)
-      }
+    // await axios.post(Url+'/VerList', {
+    //   IdEmp: IdEmp,
+    //   Tel: tel,
+    // }).then(response => {
+    //   console.log(response.data);
+    //   if(response.data.length > 0){
+    //     setPedidoList(response.data[0])
+    //   } else {
+    //     setPedidoList(null)
+    //   }
      
       
       
-    })
-    .catch(error => {
-      console.error('Erro ao buscar dados:', error);
-    });; 
+    // })
+    // .catch(error => {
+    //   console.error('Erro ao buscar dados:', error);
+    // });; 
 
       
       
@@ -51,7 +51,7 @@ export default {
       
        
   },
-  Finalizando: async (ValorEnt, Emp, Itens, Tel, Nome, Rua, Numero, Bairro, Complemento, Cidade, Estado, Pix, CartDebi, CartCred, Cheque, Boleto, Dinheiro, Troco, Buscar, Entreg, Consumo, PegarProdutos) => {
+  Finalizando: async (ValorEnt, Emp, Itens, Tel, Nome, Rua, Numero, Bairro, Complemento, Cidade, Estado, Pix, CartDebi, CartCred, Cheque, Boleto, Dinheiro, Troco, Buscar, Entreg, Consumo, PegarProdutos, setMesgSucess, setItens) => {
     var TransPix = 0
     if(Pix){
       TransPix = 1
@@ -134,7 +134,9 @@ export default {
       Consumo:TransConsumo,
       ValorEnt:ValorEnt,
     }).then(response => {
-      PegarProdutos()
+      //PegarProdutos()
+      setItens([])
+      setMesgSucess("Compra Realizada Com Sucesso!")
       console.log(response.data);
     })
     .catch(error => {

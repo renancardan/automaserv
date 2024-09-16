@@ -35,6 +35,7 @@ const App = ({PegarProdutos, setAtivoPedido, AtivoPedido, PedidoList, DadoEmp, V
     const [TelEnd, setTelEnd] = useState(false);
     const [Coment, setComent] = useState("");
     const [MesgErro1, setMesgErro1] = useState("");
+    const [MesgSucess, setMesgSucess] = useState("");
     const [Carreg, setCarreg] = useState(false);
     const [PedItens, setPedItens] = useState([]);
     const [Tot, setTot] = useState(0);
@@ -94,7 +95,13 @@ const App = ({PegarProdutos, setAtivoPedido, AtivoPedido, PedidoList, DadoEmp, V
 
     const PreencherTel = async ()=>{
       var tel = await AsyncStorage.getItem('Tel');
-      setTel(tel)
+      if(tel === null){
+        setTel("")
+      } else {
+        setTel(tel)
+      }
+      
+      
      
     }
 
@@ -107,7 +114,7 @@ const App = ({PegarProdutos, setAtivoPedido, AtivoPedido, PedidoList, DadoEmp, V
             setMesgErro1("")
             setCarreg(true)
             await AsyncStorage.setItem('Tel', Tel);
-            Api.Finalizando(ValorEnt, Emp, Itens, Tel, Nome, Rua, Numero, Bairro, Complemento, Cidade, Estado, Pix, CartDebi, CartCred, Cheque, Boleto, Dinheiro, Troco, Buscar, Entreg, Consumo, PegarProdutos )
+            Api.Finalizando(ValorEnt, Emp, Itens, Tel, Nome, Rua, Numero, Bairro, Complemento, Cidade, Estado, Pix, CartDebi, CartCred, Cheque, Boleto, Dinheiro, Troco, Buscar, Entreg, Consumo, PegarProdutos, setMesgSucess, setItens )
           } else {
               setMesgErro1("Preencha seu nome, pois é obrigatório!")
           } 
@@ -120,7 +127,7 @@ const App = ({PegarProdutos, setAtivoPedido, AtivoPedido, PedidoList, DadoEmp, V
             setMesgErro1("")
             setCarreg(true)
             await AsyncStorage.setItem('Tel', Tel);
-            Api.Finalizando(ValorEnt, Emp, Itens, Tel, Nome, Rua, Numero, Bairro, Complemento, Cidade, Estado, Pix, CartDebi, CartCred, Cheque, Boleto, Dinheiro, Troco, Buscar, Entreg, Consumo, PegarProdutos )
+            Api.Finalizando(ValorEnt, Emp, Itens, Tel, Nome, Rua, Numero, Bairro, Complemento, Cidade, Estado, Pix, CartDebi, CartCred, Cheque, Boleto, Dinheiro, Troco, Buscar, Entreg, Consumo, PegarProdutos, setMesgSucess, setItens )
           } else {
               setMesgErro1("Preencha seu nome, pois é obrigatório!")
           } 
@@ -137,7 +144,7 @@ const App = ({PegarProdutos, setAtivoPedido, AtivoPedido, PedidoList, DadoEmp, V
                    setMesgErro1("")
                     setCarreg(true)
                     await AsyncStorage.setItem('Tel', Tel);
-                    Api.Finalizando(ValorEnt, Emp, Itens, Tel, Nome, Rua, Numero, Bairro, Complemento, Cidade, Estado, Pix, CartDebi, CartCred, Cheque, Boleto, Dinheiro, Troco, Buscar, Entreg, Consumo, PegarProdutos )
+                    Api.Finalizando(ValorEnt, Emp, Itens, Tel, Nome, Rua, Numero, Bairro, Complemento, Cidade, Estado, Pix, CartDebi, CartCred, Cheque, Boleto, Dinheiro, Troco, Buscar, Entreg, Consumo, PegarProdutos, setMesgSucess, setItens )
                   } else {
                       setMesgErro1("Escolha Uma forma de Pagamento, pois é obrigatório!")
                   } 
@@ -295,6 +302,7 @@ NewItens.push(
     setModalVisible(false)
     setMesgErro1("")
     setCarreg(false)
+    setMesgSucess("")
   }
 
    
@@ -491,6 +499,16 @@ NewItens.push(
           <Text style={{fontSize:10, color:"red"}}>{MesgErro1} </Text>
         </View>
           }
+          {MesgSucess ?
+          <>
+           <View  style={styles.Container8}>
+          <Text style={{fontSize:20, color:"green"}}>{MesgSucess} </Text>
+        </View>
+          </>
+
+          :
+          <>
+         
           <View  style={styles.Container8}>
   <Text style={{fontSize:17}}>Tel:</Text>
   <Telefone
@@ -519,352 +537,353 @@ NewItens.push(
           <View  style={styles.Container8}>
   <Text style={{fontSize:17, fontWeight:"bold"}}>itens do Carrinho</Text>
           </View>
-<View style={styles.Container5}>
-{ Itens.length > 0  &&
-    <>
-    {Itens.map((item, key)=>(
-        <>
-    <View style={styles.Container1}>
-   
-     <View   style={styles.Prod4}>
-     <View   style={styles.Prod}>
-      {item.FotoUrl ?
-        <Image
-        source={{ uri: item.FotoUrl }}  // use uri instead of require
-        style={styles.Img}
-        />
-      :
-    <Image
-        source={require("../assets/semImg.gif")}  // use uri instead of require
-        style={styles.Img}
-        />
-      }
-     
-      </View>
-      <View   style={styles.Prod3}>
-        <Text style={styles.menuItem1}>{item.Quant} X {item.Nome}</Text>
-        <Text style={styles.menuItem1}>R$ {item.Preco} X {item.Quant} = R$ {item.Preco*item.Quant}</Text>
-      </View>
-      </View>
-     
-
-
-      <View style={styles.Prod2}>      
-      <View style={styles.Input}>
-              
-              
-              <TouchableHighlight  onPress={()=>DiminuirIten(key, item.Quant)}>
-               <AntDesign name="minuscircle" size={24} color="red" />
-               </TouchableHighlight>
-             
-             
-             <Campo 
-               style={styles.Input1}       
-               placeholder="" 
-               value={item.Quant}
-               onChangeText={(t, key)=>handleChange(t, key)}
-               autoCapitalize="none"
-               keyboardType={"number-pad"}
-               posi={18}
-                 />
-            <TouchableHighlight  onPress={()=>AumentarIten(key, item.Quant)}>
-             <AntDesign name="pluscircle" size={24} color="black" />
-             </TouchableHighlight>
-           </View>
-        <TouchableHighlight onPress={()=>TirarEsse(key)} style={{marginLeft: 5}} >      
-        <AntDesign name="delete" size={24} color="red" />
-      </TouchableHighlight>
-      </View >
-  </View>
-  <View style={styles.LinhaTop}></View>
-  </>
-        ))}
-      </>}
-      <Text style={{fontSize:20}}>Total: R$ {VerTotal}</Text>
-  </View>
-  <View style={styles.Container12}>
-
-  <InputComent 
-               placeholder="Digite Observação caso Tenha..." 
-               value={Coment}
-               onChangeText={t=>setComent(t)}
-               autoCapitalize="none"
-               keyboardType={"default"}
-              
+          <View style={styles.Container5}>
+          { Itens.length > 0  &&
+              <>
+              {Itens.map((item, key)=>(
+                  <>
+              <View style={styles.Container1}>
             
-            />
-          </View>
-  {Itens.length > 0 &&
-  <>
-  <View  style={styles.Container8}>
-  <Text style={{fontSize:17, fontWeight:"bold"}}>Forma de Entrega</Text>
-          </View>
-          <View  style={styles.Container18}>
-            {DadoEmp.Rec_Buscar === 1 &&
+              <View   style={styles.Prod4}>
+              <View   style={styles.Prod}>
+                {item.FotoUrl ?
+                  <Image
+                  source={{ uri: item.FotoUrl }}  // use uri instead of require
+                  style={styles.Img}
+                  />
+                :
+              <Image
+                  source={require("../assets/semImg.gif")}  // use uri instead of require
+                  style={styles.Img}
+                  />
+                }
+              
+                </View>
+                <View   style={styles.Prod3}>
+                  <Text style={styles.menuItem1}>{item.Quant} X {item.Nome}</Text>
+                  <Text style={styles.menuItem1}>R$ {item.Preco} X {item.Quant} = R$ {item.Preco*item.Quant}</Text>
+                </View>
+                </View>
+              
+
+
+                <View style={styles.Prod2}>      
+                <View style={styles.Input}>
+                        
+                        
+                        <TouchableHighlight  onPress={()=>DiminuirIten(key, item.Quant)}>
+                        <AntDesign name="minuscircle" size={24} color="red" />
+                        </TouchableHighlight>
+                      
+                      
+                      <Campo 
+                        style={styles.Input1}       
+                        placeholder="" 
+                        value={item.Quant}
+                        onChangeText={(t, key)=>handleChange(t, key)}
+                        autoCapitalize="none"
+                        keyboardType={"number-pad"}
+                        posi={18}
+                          />
+                      <TouchableHighlight  onPress={()=>AumentarIten(key, item.Quant)}>
+                      <AntDesign name="pluscircle" size={24} color="black" />
+                      </TouchableHighlight>
+                    </View>
+                  <TouchableHighlight onPress={()=>TirarEsse(key)} style={{marginLeft: 5}} >      
+                  <AntDesign name="delete" size={24} color="red" />
+                </TouchableHighlight>
+                </View >
+            </View>
+            <View style={styles.LinhaTop}></View>
+            </>
+                  ))}
+                </>}
+                <Text style={{fontSize:20}}>Total: R$ {VerTotal}</Text>
+            </View>
+            <View style={styles.Container12}>
+
+            <InputComent 
+                        placeholder="Digite Observação caso Tenha..." 
+                        value={Coment}
+                        onChangeText={t=>setComent(t)}
+                        autoCapitalize="none"
+                        keyboardType={"default"}
+                        
+                      
+                      />
+                    </View>
+            {Itens.length > 0 &&
             <>
-            {Entreg === false && Buscar === true && Consumo === false ?
-            <TouchableHighlight style={styles.Escolha1}>
-                <></>
-            </TouchableHighlight>
-            :
-            <TouchableHighlight onPress={()=>Buscando()} style={styles.Escolha}>
-                <></>
-            </TouchableHighlight>
-            }
-            
-          <Text style={styles.Text11}>Vou Buscar</Text>
+            <View  style={styles.Container8}>
+            <Text style={{fontSize:17, fontWeight:"bold"}}>Forma de Entrega</Text>
+                    </View>
+                    <View  style={styles.Container18}>
+                      {DadoEmp.Rec_Buscar === 1 &&
+                      <>
+                      {Entreg === false && Buscar === true && Consumo === false ?
+                      <TouchableHighlight style={styles.Escolha1}>
+                          <></>
+                      </TouchableHighlight>
+                      :
+                      <TouchableHighlight onPress={()=>Buscando()} style={styles.Escolha}>
+                          <></>
+                      </TouchableHighlight>
+                      }
+                      
+                    <Text style={styles.Text11}>Vou Buscar</Text>
+                      
+                      </>
+
+                      }
+                    {DadoEmp.Rec_Consumoloc === 1 &&
+                    <>
+                    {Entreg === false && Buscar === false && Consumo === true ?
+                      <TouchableHighlight style={styles.Escolha1}>
+                          <></>
+                      </TouchableHighlight>
+                      :
+                      <TouchableHighlight onPress={()=>Consumindo()} style={styles.Escolha}>
+                          <></>
+                      </TouchableHighlight>
+                      }
+                      
+                    <Text style={styles.Text11}>Consumir no Local</Text>
+                    </>
+
+                    }
+                    
+                    {DadoEmp.Rec_Entregar === 1 &&
+                    <>
+                    {Entreg === true && Buscar === false && Consumo === false?
+                      <TouchableHighlight  style={styles.Escolha1}>
+                          <></>
+                      </TouchableHighlight>
+                      :
+                      <TouchableHighlight onPress={()=>Entregar()} style={styles.Escolha}>
+                          <></>
+                      </TouchableHighlight>
+                      }
+                    <Text style={styles.Text11}>Delivery</Text>
+                    </>
+                    }
+                  
+                    </View>
+                  
+                    {TelEnd &&
+                    <>
+                    {Entreg &&
+                    <>
+                    <View  style={styles.Container8}>
+            <Text style={{fontSize:17, fontWeight:"bold"}}>Endereço</Text>
+                    </View>
+                    <View  style={styles.Container8}>
+            <Text style={{fontSize:17}}>Rua:</Text>
+            <InputNome
+                                
+                                placeholder="Digite Nome da Rua" 
+                                value={Rua}
+                                onChangeText={t=>setRua(t)}
+                                autoCapitalize="none"
+                                keyboardType={"default"}
+                                
+                            /> 
+                    </View>
+                    <View  style={styles.Container8}>
+            <Text style={{fontSize:17}}>Numero:</Text>
+            <InputNome
+                                
+                                placeholder="Digite Numero" 
+                                value={Numero}
+                                onChangeText={t=>setNumero(t)}
+                                autoCapitalize="none"
+                                keyboardType={"default"}
+                                
+                            /> 
+                    </View>
+                    <View  style={styles.Container8}>
+            <Text style={{fontSize:17}}>Bairro:</Text>
+            <InputNome
+                                
+                                placeholder="Digite Nome do Bairro" 
+                                value={Bairro}
+                                onChangeText={t=>setBairro(t)}
+                                autoCapitalize="none"
+                                keyboardType={"default"}
+                                
+                            /> 
+                    </View>
+                    <View  style={styles.Container8}>
+            <Text style={{fontSize:17}}>Complemeto:</Text>
+            <InputNome
+                                
+                                placeholder="Digite Complemento" 
+                                value={Complemento}
+                                onChangeText={t=>setComplemento(t)}
+                                autoCapitalize="none"
+                                keyboardType={"default"}
+                                
+                            /> 
+                    </View>
+                    <View  style={styles.Container8}>
+            <Text style={{fontSize:17}}>Cidade:</Text>
+            <InputNome
+                                
+                                placeholder="Digite Nome da Cidade" 
+                                value={Cidade}
+                                onChangeText={t=>setCidade(t)}
+                                autoCapitalize="none"
+                                keyboardType={"default"}
+                                
+                            /> 
+                    </View>
+                    <View  style={styles.Container8}>
+            <Text style={{fontSize:17}}>Estado:</Text>
+            <InputNome
+                                
+                                placeholder="Digite Nome do Estado" 
+                                value={Estado}
+                                onChangeText={t=>setEstado(t)}
+                                autoCapitalize="none"
+                                keyboardType={"default"}
+                                
+                            /> 
+                    </View>
+                    <View  style={styles.Container8}>
+            <Text style={{fontSize:17, fontWeight:"bold"}}>Forma de Pagamento</Text>
+                    </View>
+                    <View  style={styles.Container10}>
+                      {DadoEmp.Pg_Pix === 1 &&
+                      <View  style={styles.Container11}>
+                      {Pix ?
+                      <TouchableHighlight onPress={()=>setPix(!Pix)} style={styles.Escolha1}>
+                          <></>
+                      </TouchableHighlight>
+                      :
+                      <TouchableHighlight onPress={()=>setPix(!Pix)} style={styles.Escolha}>
+                          <></>
+                      </TouchableHighlight>
+                      }
+                      <FontAwesome6 name="pix" size={24} color="green" /> 
+                      <Text style={styles.Text12}>Pix</Text>
+                      </View>
+                      }
+                  
+                    {DadoEmp.Pg_CartDebi === 1 &&
+                    <>
+                    <View  style={styles.Container11}>
+                      {CartDebi ?
+                      <TouchableHighlight onPress={()=>setCartDebi(!CartDebi)} style={styles.Escolha1}>
+                          <></>
+                      </TouchableHighlight>
+                      :
+                      <TouchableHighlight onPress={()=>setCartDebi(!CartDebi)} style={styles.Escolha}>
+                          <></>
+                      </TouchableHighlight>
+                      }
+                      <FontAwesome5 name="credit-card" size={24} color="#0d92bc" />
+                    <Text style={styles.Text12}>Cartão de Débito</Text>
+                    </View>
+                    </>
+
+                    }
+                    {DadoEmp.Pg_CartCred === 1 &&
+                      <View  style={styles.Container11}>
+                      {CartCred ?
+                      <TouchableHighlight onPress={()=>setCartCred(!CartCred)} style={styles.Escolha1}>
+                          <></>
+                      </TouchableHighlight>
+                      :
+                      <TouchableHighlight onPress={()=>setCartCred(!CartCred)} style={styles.Escolha}>
+                          <></>
+                      </TouchableHighlight>
+                      }
+                      <FontAwesome5 name="cc-mastercard" size={24} color="#b75e26" />
+                      <Text style={styles.Text12}>Cartão de Crédito</Text>
+                      </View>
+                    }
+                    {DadoEmp.Pg_Cheque === 1 &&
+                      <View  style={styles.Container11}>
+                      {Cheque ?
+                      <TouchableHighlight onPress={()=>setCheque(!Cheque)} style={styles.Escolha1}>
+                          <></>
+                      </TouchableHighlight>
+                      :
+                      <TouchableHighlight onPress={()=>setCheque(!Cheque)} style={styles.Escolha}>
+                          <></>
+                      </TouchableHighlight>
+                      }
+                      <FontAwesome5 name="money-check-alt" size={24} color="#ff9b00" />
+                    <Text style={styles.Text12}>Cheque</Text>
+                    </View>
+
+                    }
+                    {DadoEmp.Pg_Boleto === 1 &&
+                        <View  style={styles.Container11}>
+                        {Boleto ?
+                        <TouchableHighlight onPress={()=>setBoleto(!Boleto)} style={styles.Escolha1}>
+                            <></>
+                        </TouchableHighlight>
+                        :
+                        <TouchableHighlight onPress={()=>setBoleto(!Boleto)} style={styles.Escolha}>
+                            <></>
+                        </TouchableHighlight>
+                        }
+                        <FontAwesome5 name="barcode" size={24} color="black" />
+                        <Text style={styles.Text12}>Boleto</Text>
+                        </View>
+                    }
+                    {DadoEmp.Pg_Dinheiro &&
+                  <View  style={styles.Container11}>
+                      {Dinheiro ?
+                      <TouchableHighlight onPress={()=>setDinheiro(!Dinheiro)} style={styles.Escolha1}>
+                          <></>
+                      </TouchableHighlight>
+                      :
+                      <TouchableHighlight onPress={()=>setDinheiro(!Dinheiro)} style={styles.Escolha}>
+                          <></>
+                      </TouchableHighlight>
+                      }
+                    <FontAwesome6 name="money-bill-wave" size={24} color="#006eff" /> 
+                    <Text style={styles.Text12}>Dinheiro</Text>
+                    </View>
+                    }
+                    
+                    </View>
+
+
+                    </>
+
+                    }         
+                    </>
+
+                    }
+                    {MesgErro1 &&
+                  <View  style={styles.Container8}>
+                    <Text style={{fontSize:10, color:"red"}}>{MesgErro1} </Text>
+                  </View>
+                    }
+                  {Carreg ?
+                  <View  style={styles.Container27}>
+                  <Image source={require('../assets/Loding.gif')}  style={styles.ImageVer3 } />
+                  </View>
+                  :
+                  <TouchableHighlight  onPress={() =>FinalizandoPedido()}style={styles.Container9}>
+                  <>
+                
+                <Text style={styles.menuItem2}>Finalizar a Compra</Text>
+                
+                    </>
+                </TouchableHighlight>
+                  }
+                  
             
             </>
 
             }
-           {DadoEmp.Rec_Consumoloc === 1 &&
-           <>
-           {Entreg === false && Buscar === false && Consumo === true ?
-            <TouchableHighlight style={styles.Escolha1}>
-                <></>
-            </TouchableHighlight>
-            :
-            <TouchableHighlight onPress={()=>Consumindo()} style={styles.Escolha}>
-                <></>
-            </TouchableHighlight>
-            }
-            
-          <Text style={styles.Text11}>Consumir no Local</Text>
-           </>
-
-           }
-          
-          {DadoEmp.Rec_Entregar === 1 &&
-          <>
-           {Entreg === true && Buscar === false && Consumo === false?
-            <TouchableHighlight  style={styles.Escolha1}>
-                <></>
-            </TouchableHighlight>
-            :
-            <TouchableHighlight onPress={()=>Entregar()} style={styles.Escolha}>
-                <></>
-            </TouchableHighlight>
-            }
-          <Text style={styles.Text11}>Delivery</Text>
-          </>
-          }
-         
-          </View>
-        
-          {TelEnd &&
-          <>
-          {Entreg &&
-          <>
-           <View  style={styles.Container8}>
-  <Text style={{fontSize:17, fontWeight:"bold"}}>Endereço</Text>
-          </View>
-          <View  style={styles.Container8}>
-  <Text style={{fontSize:17}}>Rua:</Text>
-  <InputNome
-                       
-                       placeholder="Digite Nome da Rua" 
-                       value={Rua}
-                       onChangeText={t=>setRua(t)}
-                       autoCapitalize="none"
-                       keyboardType={"default"}
-                      
-                   /> 
-          </View>
-          <View  style={styles.Container8}>
-  <Text style={{fontSize:17}}>Numero:</Text>
-  <InputNome
-                       
-                       placeholder="Digite Numero" 
-                       value={Numero}
-                       onChangeText={t=>setNumero(t)}
-                       autoCapitalize="none"
-                       keyboardType={"default"}
-                      
-                   /> 
-          </View>
-          <View  style={styles.Container8}>
-  <Text style={{fontSize:17}}>Bairro:</Text>
-  <InputNome
-                       
-                       placeholder="Digite Nome do Bairro" 
-                       value={Bairro}
-                       onChangeText={t=>setBairro(t)}
-                       autoCapitalize="none"
-                       keyboardType={"default"}
-                      
-                   /> 
-          </View>
-          <View  style={styles.Container8}>
-  <Text style={{fontSize:17}}>Complemeto:</Text>
-  <InputNome
-                       
-                       placeholder="Digite Complemento" 
-                       value={Complemento}
-                       onChangeText={t=>setComplemento(t)}
-                       autoCapitalize="none"
-                       keyboardType={"default"}
-                      
-                   /> 
-          </View>
-          <View  style={styles.Container8}>
-  <Text style={{fontSize:17}}>Cidade:</Text>
-  <InputNome
-                       
-                       placeholder="Digite Nome da Cidade" 
-                       value={Cidade}
-                       onChangeText={t=>setCidade(t)}
-                       autoCapitalize="none"
-                       keyboardType={"default"}
-                      
-                   /> 
-          </View>
-          <View  style={styles.Container8}>
-  <Text style={{fontSize:17}}>Estado:</Text>
-  <InputNome
-                       
-                       placeholder="Digite Nome do Estado" 
-                       value={Estado}
-                       onChangeText={t=>setEstado(t)}
-                       autoCapitalize="none"
-                       keyboardType={"default"}
-                      
-                   /> 
-          </View>
-          <View  style={styles.Container8}>
-  <Text style={{fontSize:17, fontWeight:"bold"}}>Forma de Pagamento</Text>
-          </View>
-          <View  style={styles.Container10}>
-            {DadoEmp.Pg_Pix === 1 &&
-            <View  style={styles.Container11}>
-            {Pix ?
-            <TouchableHighlight onPress={()=>setPix(!Pix)} style={styles.Escolha1}>
-                <></>
-            </TouchableHighlight>
-            :
-            <TouchableHighlight onPress={()=>setPix(!Pix)} style={styles.Escolha}>
-                <></>
-            </TouchableHighlight>
-            }
-            <FontAwesome6 name="pix" size={24} color="green" /> 
-            <Text style={styles.Text12}>Pix</Text>
-            </View>
-            }
-         
-          {DadoEmp.Pg_CartDebi === 1 &&
-          <>
-          <View  style={styles.Container11}>
-            {CartDebi ?
-            <TouchableHighlight onPress={()=>setCartDebi(!CartDebi)} style={styles.Escolha1}>
-                <></>
-            </TouchableHighlight>
-            :
-            <TouchableHighlight onPress={()=>setCartDebi(!CartDebi)} style={styles.Escolha}>
-                <></>
-            </TouchableHighlight>
-            }
-            <FontAwesome5 name="credit-card" size={24} color="#0d92bc" />
-          <Text style={styles.Text12}>Cartão de Débito</Text>
-          </View>
-          </>
-
-          }
-          {DadoEmp.Pg_CartCred === 1 &&
-            <View  style={styles.Container11}>
-            {CartCred ?
-            <TouchableHighlight onPress={()=>setCartCred(!CartCred)} style={styles.Escolha1}>
-                <></>
-            </TouchableHighlight>
-            :
-            <TouchableHighlight onPress={()=>setCartCred(!CartCred)} style={styles.Escolha}>
-                <></>
-            </TouchableHighlight>
-            }
-            <FontAwesome5 name="cc-mastercard" size={24} color="#b75e26" />
-            <Text style={styles.Text12}>Cartão de Crédito</Text>
-            </View>
-          }
-           {DadoEmp.Pg_Cheque === 1 &&
-            <View  style={styles.Container11}>
-            {Cheque ?
-            <TouchableHighlight onPress={()=>setCheque(!Cheque)} style={styles.Escolha1}>
-                <></>
-            </TouchableHighlight>
-            :
-            <TouchableHighlight onPress={()=>setCheque(!Cheque)} style={styles.Escolha}>
-                <></>
-            </TouchableHighlight>
-            }
-            <FontAwesome5 name="money-check-alt" size={24} color="#ff9b00" />
-          <Text style={styles.Text12}>Cheque</Text>
-          </View>
-
-           }
-           {DadoEmp.Pg_Boleto === 1 &&
-              <View  style={styles.Container11}>
-              {Boleto ?
-              <TouchableHighlight onPress={()=>setBoleto(!Boleto)} style={styles.Escolha1}>
-                  <></>
-              </TouchableHighlight>
-              :
-              <TouchableHighlight onPress={()=>setBoleto(!Boleto)} style={styles.Escolha}>
-                  <></>
-              </TouchableHighlight>
-              }
-              <FontAwesome5 name="barcode" size={24} color="black" />
-              <Text style={styles.Text12}>Boleto</Text>
-              </View>
-           }
-          {DadoEmp.Pg_Dinheiro &&
-        <View  style={styles.Container11}>
-            {Dinheiro ?
-            <TouchableHighlight onPress={()=>setDinheiro(!Dinheiro)} style={styles.Escolha1}>
-                <></>
-            </TouchableHighlight>
-            :
-            <TouchableHighlight onPress={()=>setDinheiro(!Dinheiro)} style={styles.Escolha}>
-                <></>
-            </TouchableHighlight>
-            }
-           <FontAwesome6 name="money-bill-wave" size={24} color="#006eff" /> 
-          <Text style={styles.Text12}>Dinheiro</Text>
-          </View>
-          }
-          
-          </View>
-
-
-          </>
-
-          }         
-          </>
-
-          }
-          {MesgErro1 &&
-        <View  style={styles.Container8}>
-          <Text style={{fontSize:10, color:"red"}}>{MesgErro1} </Text>
-        </View>
-          }
-         {Carreg ?
-         <View  style={styles.Container27}>
-         <Image source={require('../assets/Loding.gif')}  style={styles.ImageVer3 } />
-         </View>
-         :
-         <TouchableHighlight  onPress={() =>FinalizandoPedido()}style={styles.Container9}>
-         <>
-      
-       <Text style={styles.menuItem2}>Finalizar a Compra</Text>
-       
-          </>
-       </TouchableHighlight>
-         }
-        
-  
-  </>
-
-  }
              </>
             }
-         
+          </>
+          }
   
           </ScrollView>
           </View>
